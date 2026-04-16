@@ -59,15 +59,11 @@ git clone <https://github.com/nimetbuse07/Turkcell-GYGY-Kotlin/tree/main/UserLis
 
 ## Ekran Görüntüleri
 
-### Success State
-<img width="294" height="584" alt="success" src="https://github.com/user-attachments/assets/d3b6d3d7-adc6-45ba-86b6-6b35b5d15a1d" />
-
-
 ### Loading State
+![Loading Screen](screenshots/loading.png)
 
-<img width="293" height="584" alt="loading" src="https://github.com/user-attachments/assets/6c99ebf7-48e4-4f2a-833e-d01cefe03e7d" />
+### Success State
+![Success Screen](screenshots/success.png)
 
 ### Error State
-
-<img width="293" height="584" alt="error" src="https://github.com/user-attachments/assets/bd57b5ec-0a0a-478c-8e20-f85f4f11c39c" />
-
+![Error Screen](screenshots/error.png)
