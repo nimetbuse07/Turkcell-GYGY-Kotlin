@@ -5,4 +5,6 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class ToDo(
     val id: Int = 0,
-    val title:
+    val title: String,
+    val completed: Boolean = false
+)

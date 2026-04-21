@@ -38,4 +38,48 @@ class ToDoListViewModel : ViewModel() {
             } catch (e: Exception) {
                 _error.value = e.message ?: "Bir hata oluştu."
             } finally {
-  
+                _isLoading.value = false
+            }
+        }
+    }
+
+    //SİLME İŞLEMİ SONRASI VERİYİ YENİLE
+    fun delete(id: Int) {
+        viewModelScope.launch {
+            try {
+                // 1. Supabase'den veriyi sil
+                repository.delete(id)
+
+                // 2. Silme başarılıysa listeyi yeniden çek
+                fetchTodos()
+
+            } catch (e: Exception) {
+                _error.value = e.message
+            }
+
+        }
+    }
+
+    fun addTodo(title: String) {
+        viewModelScope.launch {
+            try {
+
+
+                val newTask = ToDo(
+                    id = 0,
+                    title = title,
+                    description = null
+                )
+
+                // Paketi Repository'deki "addToDo" fonksiyonuna yolla
+                repository.addToDo(newTask)
+
+                // Listeyi güncelle
+                fetchTodos()
+
+            } catch (e: Exception) {
+                _error.value = e.message
+            }
+        }
+    }
+}

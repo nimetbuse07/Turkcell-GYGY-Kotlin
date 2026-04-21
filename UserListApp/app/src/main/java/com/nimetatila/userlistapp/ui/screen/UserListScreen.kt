@@ -1,6 +1,5 @@
 package com.nimetatila.userlistapp.ui.screen
 
-// Bunu import et
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -61,6 +60,7 @@ fun UserListScreen(
             )
 
             Spacer(modifier = Modifier.height(8.dp))
+
 
             when (uiState) {
                 is UserUiState.Loading -> {
