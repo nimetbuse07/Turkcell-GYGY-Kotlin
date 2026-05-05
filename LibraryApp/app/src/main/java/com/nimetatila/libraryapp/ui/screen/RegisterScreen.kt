@@ -1,32 +1,43 @@
 package com.nimetatila.libraryapp.ui.screen
 
+import android.widget.Toast
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.input.*
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.nimetatila.libraryapp.ui.viewmodel.AuthState
 import com.nimetatila.libraryapp.ui.viewmodel.AuthViewModel
+import kotlinx.coroutines.delay
 
 @Composable
 fun RegisterScreen(
-    onBackToLogin: () -> Unit,
-    onRegisterSuccess: () -> Unit = {},
-    viewModel: AuthViewModel = viewModel()
+    onNavigateToLogin: () -> Unit,
+    onRegisterSuccess: () -> Unit,
+    authViewModel: AuthViewModel = viewModel()
 ) {
+    val authState by authViewModel.authState.collectAsState()
+    val scope = rememberCoroutineScope()
+    val context = LocalContext.current
+
+    var fullName by remember { mutableStateOf("") }
+    var studentNo by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
-    var passwordConfirm by remember { mutableStateOf("") }
 
-    val authState by viewModel.authState.collectAsStateWithLifecycle()
 
     LaunchedEffect(authState) {
-        if (authState is AuthState.Success) onRegisterSuccess()
+        if (authState is AuthState.Success) {
+            Toast.makeText(context, "Kayıt başarılı! Lütfen giriş yapın.", Toast.LENGTH_LONG).show()
+            authViewModel.resetState()
+            onNavigateToLogin()
+        }
     }
 
     Column(
@@ -34,68 +45,97 @@ fun RegisterScreen(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        Text("Kayıt Ol")
+        Text("Yeni Hesap Oluştur", style = MaterialTheme.typography.headlineMedium)
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(24.dp))
+
+        OutlinedTextField(
+            value = fullName,
+            onValueChange = { fullName = it },
+            label = { Text("Ad Soyad") },
+            modifier = Modifier.fillMaxWidth(),
+            enabled = authState !is AuthState.Loading,
+            singleLine = true
+        )
+
+        Spacer(modifier = Modifier.height(12.dp))
 
         OutlinedTextField(
             value = email,
             onValueChange = { email = it },
             label = { Text("E-posta") },
-            singleLine = true,
             modifier = Modifier.fillMaxWidth(),
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email)
+            enabled = authState !is AuthState.Loading,
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
+            singleLine = true
         )
-        Spacer(modifier = Modifier.height(10.dp))
+
+        Spacer(modifier = Modifier.height(12.dp))
+
         OutlinedTextField(
             value = password,
             onValueChange = { password = it },
             label = { Text("Şifre") },
-            singleLine = true,
             modifier = Modifier.fillMaxWidth(),
+            enabled = authState !is AuthState.Loading,
+            visualTransformation = PasswordVisualTransformation(),
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-            visualTransformation = PasswordVisualTransformation()
+            singleLine = true
         )
-        Spacer(modifier = Modifier.height(10.dp))
+
+        Spacer(modifier = Modifier.height(12.dp))
+
         OutlinedTextField(
-            value = passwordConfirm,
-            onValueChange = { passwordConfirm = it },
-            label = { Text("Şifre Tekrar") },
-            singleLine = true,
+            value = studentNo,
+            onValueChange = { studentNo = it },
+            label = { Text("Öğrenci No (opsiyonel)") },
             modifier = Modifier.fillMaxWidth(),
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-            visualTransformation = PasswordVisualTransformation()
+            enabled = authState !is AuthState.Loading,
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+            singleLine = true
         )
-        Spacer(modifier = Modifier.height(10.dp))
 
-        if (authState is AuthState.Error) {
-            Text(
-                text = (authState as AuthState.Error).message,
-                color = MaterialTheme.colorScheme.error
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-        }
+        Spacer(modifier = Modifier.height(24.dp))
 
-        Button(
-            onClick = {
-                if (password == passwordConfirm) {
-                    viewModel.register(email, password)
-                }
-            },
-            modifier = Modifier.fillMaxWidth(),
-            enabled = authState !is AuthState.Loading && password == passwordConfirm
-        ) {
-            if (authState is AuthState.Loading) {
-                CircularProgressIndicator(modifier = Modifier.size(20.dp), strokeWidth = 2.dp)
-            } else {
+        if (authState is AuthState.Loading) {
+            CircularProgressIndicator()
+        } else {
+            Button(
+                onClick = {
+
+                    if (email.isNotEmpty() && password.isNotEmpty() && fullName.isNotEmpty()) {
+                        authViewModel.signUp(email, password, fullName, studentNo)
+                    }
+                },
+                modifier = Modifier.fillMaxWidth()
+            ) {
                 Text("Kayıt Ol")
+            }
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            TextButton(onClick = onNavigateToLogin) {
+                Text("Zaten hesabın var mı? Giriş Yap")
             }
         }
 
-        Spacer(modifier = Modifier.height(8.dp))
 
-        TextButton(onClick = onBackToLogin) {
-            Text("Zaten hesabın var mı? Giriş yap")
+        when (authState) {
+            is AuthState.Success -> {
+                Text(
+                    text = "Kayıt Başarılı! Giriş yapmanız bekleniyor...",
+                    color = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.padding(top = 16.dp)
+                )
+            }
+            is AuthState.Error -> {
+                Text(
+                    text = (authState as AuthState.Error).message,
+                    color = MaterialTheme.colorScheme.error,
+                    modifier = Modifier.padding(top = 16.dp)
+                )
+            }
+            else -> {}
         }
     }
 }

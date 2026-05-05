@@ -6,6 +6,7 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import com.nimetatila.libraryapp.ui.navigation.NavGraph
 
+
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -15,3 +16,4 @@ class MainActivity : ComponentActivity() {
         }
     }
 }
+
